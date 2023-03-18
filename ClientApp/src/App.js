@@ -4,16 +4,19 @@ import { Grid, Card, Box, Typography } from "@mui/material";
 import Sentiment from "./Sentiment";
 import { HubConnectionState } from "@microsoft/signalr";
 
+const defaultState = { score: [0, 0] };
+
 const App = ({ connection }) => {
-  const [value, setValue] = useState(0);
+  const [result, setResult] = useState(defaultState);
 
   useEffect(() => {
     if (
       connection.state !== HubConnectionState.Connected &&
       connection.state !== HubConnectionState.Connecting
     ) {
-      connection.on("ReceiveSentiment", (value) => {
-        setValue(value.value);
+      connection.on("ReceiveSentiment", (result) => {
+        console.log(result);
+        setResult(result);
       });
       connection.start().catch((err) => console.error(err.toString()));
     }
@@ -23,6 +26,8 @@ const App = ({ connection }) => {
     const text = event.target.value;
     if (text.length > 0) {
       connection.invoke("RecieveText", text);
+    } else {
+      setResult(defaultState);
     }
   };
 
@@ -56,7 +61,22 @@ const App = ({ connection }) => {
                   fontSize: 100,
                 }}
               >
-                <Sentiment value={value} />
+                <Sentiment
+                  positiveSentiment={result.score[0]}
+                  negativeSentiment={result.score[1]}
+                />
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 16,
+              }}
+            >
+              <Typography variant="h6">
+                {`Positive sentiment score: ${result.score[0]}, Negative sentiment score: ${result.score[1]}`}
               </Typography>
             </Box>
             <Box
