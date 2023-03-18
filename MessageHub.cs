@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using static LanguageSentimentAnalysis.MLModel;
 
 namespace LanguageSentimentAnalysis
 {
@@ -6,15 +7,18 @@ namespace LanguageSentimentAnalysis
     {
         public async Task RecieveText(string text)
         {
-            // TODO: pass the text into our model, and get the result
+            ModelInput data = new ModelInput()
+            {
+                ReviewText = text
+            };
 
-            double randomNum = new Random().NextDouble() * 2 - 1;
+            var prediction = MLModel.Predict(data);
 
             var result = new
             {
-                value = randomNum
+                score = prediction.Score
             };
-
+      
             await Clients.Caller.SendAsync("ReceiveSentiment", result);
         }
     }
